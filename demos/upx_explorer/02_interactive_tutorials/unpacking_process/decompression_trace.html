@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPX Decompression Trace - Interactive Unpacking Simulator</title>
+    <link rel="stylesheet" href="../../assets/styles/upx_theme.css">
+    <link rel="stylesheet" href="../../assets/styles/animations.css">
+    <style>
+        body {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .memory-view {
+            background-color: var(--code-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .memory-view h3 {
+            color: var(--accent-cyan);
+            margin-bottom: 1rem;
+        }
+
+        .memory-block {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 4px;
+            margin-top: 1rem;
+        }
+
+        .byte {
+            padding: 0.5rem;
+            text-align: center;
+            background-color: var(--bg-darker);
+            border: 1px solid var(--border-color);
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .byte.compressed {
+            background-color: rgba(255, 189, 46, 0.3);
+        }
+
+        .byte.decompressing {
+            animation: pulse 0.5s;
+            background-color: var(--accent-cyan);
+        }
+
+        .byte.decompressed {
+            background-color: rgba(0, 255, 65, 0.3);
+        }
+
+        .controls {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .controls button {
+            margin: 0.5rem;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+        }
+
+        .step-info {
+            background-color: var(--code-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .step-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .step-list li {
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            background-color: var(--bg-darker);
+            border-left: 4px solid var(--text-secondary);
+            transition: all 0.3s ease;
+        }
+
+        .step-list li.active {
+            border-left-color: var(--primary-color);
+            background-color: rgba(0, 255, 65, 0.1);
+        }
+
+        .step-list li.completed {
+            border-left-color: var(--accent-cyan);
+            opacity: 0.7;
+        }
+
+        .register-view {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .register {
+            background-color: var(--bg-darker);
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        .register-name {
+            color: var(--accent-purple);
+            font-weight: bold;
+        }
+
+        .register-value {
+            color: var(--primary-color);
+            font-family: monospace;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🎯 UPX Decompression Trace</h1>
+    <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">
+        Watch the unpacking process step-by-step as compressed code is restored to memory
+    </p>
+
+    <div class="controls">
+        <button onclick="startSimulation()">▶️ Start Simulation</button>
+        <button onclick="stepForward()">⏭️ Step Forward</button>
+        <button onclick="resetSimulation()">🔄 Reset</button>
+        <button onclick="toggleSpeed()">⚡ Speed: <span id="speed">Normal</span></button>
+    </div>
+
+    <div class="container">
+        <div class="memory-view">
+            <h3>📦 Compressed Memory</h3>
+            <p style="color: var(--text-secondary);">This is how the packed executable looks in memory</p>
+            <div class="memory-block" id="compressedMemory"></div>
+        </div>
+
+        <div class="memory-view">
+            <h3>✨ Decompressed Memory</h3>
+            <p style="color: var(--text-secondary);">Original code being restored</p>
+            <div class="memory-block" id="decompressedMemory"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="memory-view">
+            <h3>📊 CPU Registers</h3>
+            <div class="register-view">
+                <div class="register">
+                    <span class="register-name">EAX:</span>
+                    <span class="register-value" id="eax">0x00000000</span>
+                </div>
+                <div class="register">
+                    <span class="register-name">EBX:</span>
+                    <span class="register-value" id="ebx">0x00000000</span>
+                </div>
+                <div class="register">
+                    <span class="register-name">ECX:</span>
+                    <span class="register-value" id="ecx">0x00000000</span>
+                </div>
+                <div class="register">
+                    <span class="register-name">EDX:</span>
+                    <span class="register-value" id="edx">0x00000000</span>
+                </div>
+                <div class="register">
+                    <span class="register-name">ESI:</span>
+                    <span class="register-value" id="esi">0x00401000</span>
+                </div>
+                <div class="register">
+                    <span class="register-name">EDI:</span>
+                    <span class="register-value" id="edi">0x00402000</span>
+                </div>
+                <div class="register">
+                    <span class="register-name">EIP:</span>
+                    <span class="register-value" id="eip">0x00401000</span>
+                </div>
+                <div class="register">
+                    <span class="register-name">ESP:</span>
+                    <span class="register-value" id="esp">0x0012FF00</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="step-info">
+            <h3 style="color: var(--primary-color);">📝 Unpacking Steps</h3>
+            <ul class="step-list" id="stepList">
+                <li>1. Load packed executable into memory</li>
+                <li>2. Execute decompressor stub</li>
+                <li>3. Initialize decompression buffers</li>
+                <li>4. Read compressed data</li>
+                <li>5. Decompress using LZMA algorithm</li>
+                <li>6. Write decompressed data to memory</li>
+                <li>7. Fix import address table (IAT)</li>
+                <li>8. Restore original entry point</li>
+                <li>9. Clear compression buffers</li>
+                <li>10. Jump to original code (OEP)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 0;
+        let isRunning = false;
+        let speed = 1000; // milliseconds
+        let intervalId = null;
+
+        // Initialize memory views
+        function initMemory() {
+            const compressed = document.getElementById('compressedMemory');
+            const decompressed = document.getElementById('decompressedMemory');
+            
+            compressed.innerHTML = '';
+            decompressed.innerHTML = '';
+            
+            // Create 64 bytes for visualization
+            for (let i = 0; i < 64; i++) {
+                const compByte = document.createElement('div');
+                compByte.className = 'byte compressed';
+                compByte.textContent = Math.floor(Math.random() * 256).toString(16).padStart(2, '0');
+                compressed.appendChild(compByte);
+                
+                const decompByte = document.createElement('div');
+                decompByte.className = 'byte';
+                decompByte.textContent = '--';
+                decompressed.appendChild(decompByte);
+            }
+        }
+
+        function updateRegisters(step) {
+            const registers = {
+                eax: ['0x00000000', '0x00401000', '0x00000001', '0x00000080'],
+                ecx: ['0x00000000', '0x00000040', '0x00000020', '0x00000000'],
+                esi: ['0x00401000', '0x00401010', '0x00401020', '0x00401040'],
+                edi: ['0x00402000', '0x00402010', '0x00402020', '0x00402040'],
+                eip: ['0x00401000', '0x00401005', '0x0040100A', '0x00401234']
+            };
+            
+            Object.keys(registers).forEach(reg => {
+                const elem = document.getElementById(reg);
+                if (elem && registers[reg][Math.min(step, 3)]) {
+                    elem.textContent = registers[reg][Math.min(step, 3)];
+                }
+            });
+        }
+
+        function stepForward() {
+            if (currentStep >= 10) {
+                return;
+            }
+            
+            // Update step list
+            const steps = document.querySelectorAll('.step-list li');
+            if (currentStep > 0) {
+                steps[currentStep - 1].classList.remove('active');
+                steps[currentStep - 1].classList.add('completed');
+            }
+            steps[currentStep].classList.add('active');
+            
+            // Animate bytes
+            const compressedBytes = document.querySelectorAll('#compressedMemory .byte');
+            const decompressedBytes = document.querySelectorAll('#decompressedMemory .byte');
+            
+            const startIdx = currentStep * 6;
+            const endIdx = Math.min(startIdx + 6, 64);
+            
+            for (let i = startIdx; i < endIdx; i++) {
+                setTimeout(() => {
+                    if (compressedBytes[i]) {
+                        compressedBytes[i].classList.add('decompressing');
+                    }
+                    
+                    setTimeout(() => {
+                        if (decompressedBytes[i]) {
+                            const opcodes = ['55', '8B', 'EC', '83', 'C4', 'F0', 'B8', '01', '00', '00', '00', 'C3'];
+                            decompressedBytes[i].textContent = opcodes[i % opcodes.length];
+                            decompressedBytes[i].classList.add('decompressed');
+                        }
+                        
+                        if (compressedBytes[i]) {
+                            compressedBytes[i].classList.remove('decompressing');
+                        }
+                    }, 200);
+                }, (i - startIdx) * 100);
+            }
+            
+            updateRegisters(currentStep);
+            currentStep++;
+        }
+
+        function startSimulation() {
+            if (isRunning) {
+                isRunning = false;
+                clearInterval(intervalId);
+                return;
+            }
+            
+            isRunning = true;
+            intervalId = setInterval(() => {
+                stepForward();
+                if (currentStep >= 10) {
+                    isRunning = false;
+                    clearInterval(intervalId);
+                }
+            }, speed);
+        }
+
+        function resetSimulation() {
+            isRunning = false;
+            clearInterval(intervalId);
+            currentStep = 0;
+            
+            initMemory();
+            
+            document.querySelectorAll('.step-list li').forEach(step => {
+                step.classList.remove('active', 'completed');
+            });
+            
+            updateRegisters(0);
+        }
+
+        function toggleSpeed() {
+            const speeds = [1000, 500, 250];
+            const speedNames = ['Normal', 'Fast', 'Ultra'];
+            const currentIdx = speeds.indexOf(speed);
+            const nextIdx = (currentIdx + 1) % speeds.length;
+            
+            speed = speeds[nextIdx];
+            document.getElementById('speed').textContent = speedNames[nextIdx];
+            
+            if (isRunning) {
+                clearInterval(intervalId);
+                intervalId = setInterval(() => {
+                    stepForward();
+                    if (currentStep >= 10) {
+                        isRunning = false;
+                        clearInterval(intervalId);
+                    }
+                }, speed);
+            }
+        }
+
+        // Initialize on load
+        window.onload = () => {
+            initMemory();
+        };
+    </script>
+</body>
+</html>

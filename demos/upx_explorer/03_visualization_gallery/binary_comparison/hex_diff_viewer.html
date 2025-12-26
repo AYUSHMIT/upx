@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hex Diff Viewer - Compare Packed vs Unpacked</title>
+    <link rel="stylesheet" href="../../assets/styles/upx_theme.css">
+    <link rel="stylesheet" href="../../assets/styles/animations.css">
+    <style>
+        body {
+            padding: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+        }
+
+        .controls {
+            background-color: var(--code-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .file-input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .file-input-section {
+            text-align: center;
+        }
+
+        .file-input-section h3 {
+            color: var(--accent-cyan);
+            margin-bottom: 1rem;
+        }
+
+        input[type="file"] {
+            display: block;
+            width: 100%;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-box {
+            background-color: var(--bg-darker);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .hex-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .hex-panel {
+            background-color: var(--code-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .hex-panel h3 {
+            color: var(--accent-purple);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .hex-display {
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.8;
+            max-height: 600px;
+            overflow-y: auto;
+            background-color: var(--bg-darker);
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        .hex-line {
+            display: flex;
+            margin-bottom: 0.25rem;
+        }
+
+        .hex-address {
+            color: var(--text-secondary);
+            margin-right: 1rem;
+            min-width: 80px;
+        }
+
+        .hex-bytes {
+            display: flex;
+            gap: 0.5rem;
+            flex: 1;
+        }
+
+        .hex-byte {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .hex-byte:hover {
+            color: var(--accent-cyan);
+            transform: scale(1.1);
+        }
+
+        .hex-byte.different {
+            color: #ff5f56;
+            font-weight: bold;
+        }
+
+        .hex-byte.same {
+            color: var(--text-primary);
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+            padding: 1rem;
+            background-color: var(--code-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+        }
+
+        @media (max-width: 1024px) {
+            .hex-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .file-input-group {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Hex Diff Viewer</h1>
+    <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">
+        Compare packed and unpacked executables byte-by-byte
+    </p>
+
+    <div class="controls">
+        <div class="file-input-group">
+            <div class="file-input-section">
+                <h3>📦 Packed File</h3>
+                <input type="file" id="packedFile" accept="*">
+                <p style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">
+                    Upload a UPX-packed executable
+                </p>
+            </div>
+
+            <div class="file-input-section">
+                <h3>✨ Unpacked File</h3>
+                <input type="file" id="unpackedFile" accept="*">
+                <p style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">
+                    Upload the original unpacked executable
+                </p>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 1rem;">
+            <button onclick="compareFiles()">⚡ Compare Files</button>
+            <button onclick="generateSample()">🎲 Generate Sample Data</button>
+        </div>
+
+        <div class="stats" id="stats" style="display: none;">
+            <div class="stat-box">
+                <div class="stat-label">Packed Size</div>
+                <div class="stat-value" id="packedSize">0 KB</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Unpacked Size</div>
+                <div class="stat-value" id="unpackedSize">0 KB</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Compression Ratio</div>
+                <div class="stat-value" id="ratio">0%</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Bytes Saved</div>
+                <div class="stat-value" id="saved">0 KB</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="hex-container">
+        <div class="hex-panel">
+            <h3>📦 Packed Hex View</h3>
+            <div class="hex-display" id="packedHex">
+                <p style="text-align: center; color: var(--text-secondary);">
+                    Upload a packed file to view hex data
+                </p>
+            </div>
+        </div>
+
+        <div class="hex-panel">
+            <h3>✨ Unpacked Hex View</h3>
+            <div class="hex-display" id="unpackedHex">
+                <p style="text-align: center; color: var(--text-secondary);">
+                    Upload an unpacked file to view hex data
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #ff5f56;"></div>
+            <span>Different bytes</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: var(--text-primary);"></div>
+            <span>Matching bytes</span>
+        </div>
+    </div>
+
+    <script>
+        let packedData = null;
+        let unpackedData = null;
+
+        document.getElementById('packedFile').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    packedData = new Uint8Array(event.target.result);
+                    displayHex('packedHex', packedData);
+                };
+                reader.readAsArrayBuffer(file);
+            }
+        });
+
+        document.getElementById('unpackedFile').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    unpackedData = new Uint8Array(event.target.result);
+                    displayHex('unpackedHex', unpackedData);
+                };
+                reader.readAsArrayBuffer(file);
+            }
+        });
+
+        function displayHex(elementId, data, compareData = null) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = '';
+
+            const maxBytes = Math.min(data.length, 512); // Show first 512 bytes
+            const bytesPerLine = 16;
+
+            for (let i = 0; i < maxBytes; i += bytesPerLine) {
+                const line = document.createElement('div');
+                line.className = 'hex-line';
+
+                // Address
+                const address = document.createElement('span');
+                address.className = 'hex-address';
+                address.textContent = '0x' + i.toString(16).padStart(8, '0').toUpperCase();
+                line.appendChild(address);
+
+                // Hex bytes
+                const bytes = document.createElement('div');
+                bytes.className = 'hex-bytes';
+
+                for (let j = 0; j < bytesPerLine && (i + j) < maxBytes; j++) {
+                    const byte = document.createElement('span');
+                    const byteValue = data[i + j];
+                    byte.textContent = byteValue.toString(16).padStart(2, '0').toUpperCase();
+                    
+                    if (compareData && (i + j) < compareData.length) {
+                        byte.className = byteValue === compareData[i + j] ? 'hex-byte same' : 'hex-byte different';
+                    } else {
+                        byte.className = 'hex-byte';
+                    }
+                    
+                    bytes.appendChild(byte);
+                }
+
+                line.appendChild(bytes);
+                element.appendChild(line);
+            }
+
+            if (data.length > maxBytes) {
+                const more = document.createElement('p');
+                more.textContent = `... and ${data.length - maxBytes} more bytes`;
+                more.style.textAlign = 'center';
+                more.style.color = 'var(--text-secondary)';
+                more.style.marginTop = '1rem';
+                element.appendChild(more);
+            }
+        }
+
+        function compareFiles() {
+            if (!packedData || !unpackedData) {
+                alert('Please upload both packed and unpacked files first!');
+                return;
+            }
+
+            // Update stats
+            const packedSize = packedData.length;
+            const unpackedSize = unpackedData.length;
+            const ratio = ((1 - packedSize / unpackedSize) * 100).toFixed(2);
+            const saved = ((unpackedSize - packedSize) / 1024).toFixed(2);
+
+            document.getElementById('packedSize').textContent = (packedSize / 1024).toFixed(2) + ' KB';
+            document.getElementById('unpackedSize').textContent = (unpackedSize / 1024).toFixed(2) + ' KB';
+            document.getElementById('ratio').textContent = ratio + '%';
+            document.getElementById('saved').textContent = saved + ' KB';
+            document.getElementById('stats').style.display = 'grid';
+
+            // Redisplay with comparison
+            displayHex('packedHex', packedData, unpackedData);
+            displayHex('unpackedHex', unpackedData, packedData);
+        }
+
+        function generateSample() {
+            // Generate sample data for demonstration
+            const unpackedSize = 1024;
+            const packedSize = 384;
+
+            // Simulate unpacked data (PE header + code)
+            unpackedData = new Uint8Array(unpackedSize);
+            // PE signature "MZ"
+            unpackedData[0] = 0x4D;
+            unpackedData[1] = 0x5A;
+            
+            // Fill with pseudo-random but realistic data
+            for (let i = 2; i < unpackedSize; i++) {
+                unpackedData[i] = Math.floor(Math.random() * 256);
+            }
+
+            // Simulate packed data (UPX header + compressed)
+            packedData = new Uint8Array(packedSize);
+            // UPX signature
+            packedData[0] = 0x55; // 'U'
+            packedData[1] = 0x50; // 'P'
+            packedData[2] = 0x58; // 'X'
+            packedData[3] = 0x21; // '!'
+            
+            // Fill with compressed-looking data (higher entropy)
+            for (let i = 4; i < packedSize; i++) {
+                packedData[i] = Math.floor(Math.random() * 256);
+            }
+
+            // Display
+            displayHex('packedHex', packedData);
+            displayHex('unpackedHex', unpackedData);
+
+            // Auto-compare
+            compareFiles();
+        }
+    </script>
+</body>
+</html>
