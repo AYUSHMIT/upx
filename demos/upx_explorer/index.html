@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPX Explorer - Interactive Binary Packing Visualizer</title>
+    <link rel="stylesheet" href="assets/styles/upx_theme.css">
+    <link rel="stylesheet" href="assets/styles/animations.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 0;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        .hero-banner {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .card p {
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50px;
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 0.5rem;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .features-list {
+            list-style: none;
+            padding: 1rem 0;
+        }
+
+        .features-list li {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        .features-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4ade80;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 3rem 0;
+            margin-top: 4rem;
+            border-top: 2px solid rgba(255, 255, 255, 0.2);
+            opacity: 0.8;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 UPX Explorer</h1>
+            <p class="subtitle">Interactive Binary Packing Visualizer</p>
+            <p>Understand how the Ultimate Packer for eXecutables works through beautiful visualizations</p>
+        </header>
+
+        <div class="hero-banner">
+            <h2 style="margin-bottom: 1rem;">🚀 Welcome to UPX Explorer</h2>
+            <p style="line-height: 1.8;">
+                Dive deep into the world of executable compression! This interactive demo helps you understand 
+                how UPX packs and unpacks binaries, explores PE/ELF structures, visualizes compression algorithms, 
+                and demonstrates advanced binary analysis techniques.
+            </p>
+            <div style="margin-top: 2rem;">
+                <a href="#getting-started" class="btn">Get Started</a>
+                <a href="https://github.com/upx/upx" class="btn" target="_blank">UPX on GitHub</a>
+            </div>
+        </div>
+
+        <h2 style="text-align: center; margin: 3rem 0 2rem;">📚 Explore Topics</h2>
+
+        <div class="grid">
+            <div class="card" onclick="location.href='01_introduction/00_what_is_upx.md'">
+                <span class="card-icon">📖</span>
+                <h3>Introduction</h3>
+                <p>Learn what UPX is, why pack executables, and understand compression algorithms (LZMA, UCL, NRV).</p>
+            </div>
+
+            <div class="card" onclick="location.href='02_interactive_tutorials/packing_basics/tutorial.md'">
+                <span class="card-icon">🎮</span>
+                <h3>Interactive Tutorials</h3>
+                <p>Step-by-step guides with live visualizations for packing, unpacking, and binary analysis.</p>
+            </div>
+
+            <div class="card" onclick="location.href='03_visualization_gallery/binary_comparison/hex_diff_viewer.html'">
+                <span class="card-icon">🎨</span>
+                <h3>Visualization Gallery</h3>
+                <p>Hex viewers, entropy heatmaps, control flow graphs, and memory layout visualizations.</p>
+            </div>
+
+            <div class="card" onclick="location.href='04_case_studies/malware_analysis/upx_in_malware.md'">
+                <span class="card-icon">💼</span>
+                <h3>Case Studies</h3>
+                <p>Real-world examples: malware analysis, size optimization, game modding, and forensics.</p>
+            </div>
+
+            <div class="card" onclick="location.href='05_performance_analysis/compression_benchmarks/algorithm_comparison.html'">
+                <span class="card-icon">📊</span>
+                <h3>Performance Analysis</h3>
+                <p>Benchmark compression algorithms, measure unpacking overhead, and optimize performance.</p>
+            </div>
+
+            <div class="card" onclick="location.href='06_advanced_topics/custom_loaders/linux_loader.md'">
+                <span class="card-icon">🔬</span>
+                <h3>Advanced Topics</h3>
+                <p>Custom loaders, multi-platform support, overlay preservation, and stub development.</p>
+            </div>
+
+            <div class="card" onclick="location.href='07_interactive_playground/online_packer/web_packer.html'">
+                <span class="card-icon">🧪</span>
+                <h3>Interactive Playground</h3>
+                <p>Test compression algorithms, analyze binaries, and experiment with packing parameters.</p>
+            </div>
+
+            <div class="card" onclick="location.href='02_interactive_tutorials/unpacking_process/decompression_trace.html'">
+                <span class="card-icon">🎯</span>
+                <h3>Unpacking Simulator</h3>
+                <p>Watch the unpacking process in real-time with animated memory reconstruction.</p>
+            </div>
+        </div>
+
+        <div id="getting-started" class="hero-banner" style="margin-top: 4rem;">
+            <h2 style="margin-bottom: 1.5rem;">✨ Key Features</h2>
+            <div class="grid" style="margin-top: 2rem;">
+                <div>
+                    <h3>🔍 Interactive Visualizations</h3>
+                    <ul class="features-list">
+                        <li>Hex editor with color-coded sections</li>
+                        <li>Real-time compression visualizer</li>
+                        <li>PE/ELF structure explorer</li>
+                        <li>Entropy analysis heatmaps</li>
+                        <li>Control flow graphs</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>📚 Educational Content</h3>
+                    <ul class="features-list">
+                        <li>Step-by-step tutorials</li>
+                        <li>Compression algorithm deep dives</li>
+                        <li>Binary format specifications</li>
+                        <li>Malware analysis techniques</li>
+                        <li>Forensics case studies</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>🧪 Hands-On Tools</h3>
+                    <ul class="features-list">
+                        <li>Online binary packer (WASM)</li>
+                        <li>Algorithm comparison tool</li>
+                        <li>Forensics toolkit</li>
+                        <li>Signature scanner</li>
+                        <li>Parameter optimizer</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-banner" style="margin-top: 3rem;">
+            <h2 style="margin-bottom: 1rem;">🎓 Learning Paths</h2>
+            <div style="text-align: left; margin-top: 1.5rem;">
+                <h3>🌱 Beginner (Start Here)</h3>
+                <p style="margin: 1rem 0;">Perfect for those new to executable packing:</p>
+                <ol style="padding-left: 2rem; line-height: 2;">
+                    <li>Introduction → What is UPX</li>
+                    <li>Packing Basics → Tutorial</li>
+                    <li>Executable Structure → PE Format Explorer</li>
+                    <li>Compression → LZMA Algorithm</li>
+                </ol>
+
+                <h3 style="margin-top: 2rem;">🌿 Intermediate</h3>
+                <p style="margin: 1rem 0;">For those ready to dive deeper:</p>
+                <ol style="padding-left: 2rem; line-height: 2;">
+                    <li>Unpacking Process → Decompression Trace</li>
+                    <li>Binary Comparison → Hex Diff Viewer</li>
+                    <li>Case Studies → Malware Analysis</li>
+                    <li>Performance → Algorithm Benchmarks</li>
+                </ol>
+
+                <h3 style="margin-top: 2rem;">🌳 Advanced</h3>
+                <p style="margin: 1rem 0;">For experienced reverse engineers:</p>
+                <ol style="padding-left: 2rem; line-height: 2;">
+                    <li>Custom Loaders → Linux Loader Internals</li>
+                    <li>Multi-Platform → Cross-Platform Packing</li>
+                    <li>Forensics Toolkit → Signature Scanner</li>
+                    <li>Advanced → Custom Stub Development</li>
+                </ol>
+            </div>
+        </div>
+
+        <footer>
+            <p style="margin-bottom: 1rem;">
+                <strong>UPX Explorer</strong> - Educational Demo Project
+            </p>
+            <p style="opacity: 0.8;">
+                Based on <a href="https://github.com/upx/upx" style="color: #4ade80; text-decoration: none;">UPX - Ultimate Packer for eXecutables</a>
+            </p>
+            <p style="margin-top: 1rem; opacity: 0.7;">
+                Licensed under GPL v2+ | For educational purposes only
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Add smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add animation to cards on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animation = 'fadeInDown 0.6s ease-out';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.card').forEach(card => {
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,325 @@
+/* UPX Theme - Dark Hacker Style */
+
+:root {
+    --primary-color: #00ff41;
+    --secondary-color: #0f0;
+    --bg-dark: #0a0e27;
+    --bg-darker: #050810;
+    --text-primary: #e0e0e0;
+    --text-secondary: #a0a0a0;
+    --accent-cyan: #00d9ff;
+    --accent-purple: #b794f6;
+    --border-color: rgba(0, 255, 65, 0.3);
+    --code-bg: #1a1e3a;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+}
+
+.terminal {
+    background-color: var(--bg-darker);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    font-family: 'Courier New', monospace;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+}
+
+.terminal-header {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.terminal-button {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.terminal-button.red { background-color: #ff5f56; }
+.terminal-button.yellow { background-color: #ffbd2e; }
+.terminal-button.green { background-color: #27c93f; }
+
+.code-line {
+    line-height: 1.6;
+    color: var(--primary-color);
+}
+
+.code-comment {
+    color: #6a9955;
+}
+
+.code-keyword {
+    color: #569cd6;
+    font-weight: bold;
+}
+
+.code-string {
+    color: #ce9178;
+}
+
+.code-function {
+    color: #dcdcaa;
+}
+
+.glow {
+    text-shadow: 0 0 10px var(--primary-color);
+}
+
+.matrix-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.05;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.cyber-border {
+    border: 2px solid var(--primary-color);
+    box-shadow: 
+        0 0 5px var(--primary-color),
+        inset 0 0 5px var(--primary-color);
+}
+
+.neon-text {
+    color: var(--primary-color);
+    text-shadow: 
+        0 0 7px var(--primary-color),
+        0 0 10px var(--primary-color),
+        0 0 21px var(--primary-color);
+}
+
+.hex-grid {
+    display: grid;
+    grid-template-columns: repeat(16, 1fr);
+    gap: 2px;
+    font-size: 0.9rem;
+}
+
+.hex-byte {
+    padding: 0.25rem;
+    background-color: var(--code-bg);
+    border: 1px solid var(--border-color);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.hex-byte:hover {
+    background-color: var(--primary-color);
+    color: var(--bg-dark);
+    transform: scale(1.1);
+}
+
+.hex-byte.executable {
+    background-color: rgba(255, 100, 100, 0.3);
+}
+
+.hex-byte.data {
+    background-color: rgba(100, 100, 255, 0.3);
+}
+
+.hex-byte.compressed {
+    background-color: rgba(100, 255, 100, 0.3);
+}
+
+.status-bar {
+    background-color: var(--bg-darker);
+    border-top: 2px solid var(--border-color);
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+.status-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+}
+
+.status-indicator.active {
+    background-color: var(--primary-color);
+    box-shadow: 0 0 10px var(--primary-color);
+}
+
+.status-indicator.inactive {
+    background-color: #666;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background-color: var(--bg-darker);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-cyan));
+    transition: width 0.3s ease;
+    box-shadow: 0 0 10px var(--primary-color);
+}
+
+.progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--text-primary);
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.tab-container {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: 1rem;
+}
+
+.tab {
+    padding: 0.75rem 1.5rem;
+    background-color: var(--bg-darker);
+    border: 1px solid var(--border-color);
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tab:hover {
+    background-color: rgba(0, 255, 65, 0.1);
+}
+
+.tab.active {
+    background-color: var(--code-bg);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.info-box {
+    background-color: rgba(0, 217, 255, 0.1);
+    border-left: 4px solid var(--accent-cyan);
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 4px;
+}
+
+.warning-box {
+    background-color: rgba(255, 189, 46, 0.1);
+    border-left: 4px solid #ffbd2e;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 4px;
+}
+
+.error-box {
+    background-color: rgba(255, 95, 86, 0.1);
+    border-left: 4px solid #ff5f56;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 4px;
+}
+
+.success-box {
+    background-color: rgba(39, 201, 63, 0.1);
+    border-left: 4px solid #27c93f;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 4px;
+}
+
+button {
+    background-color: var(--code-bg);
+    color: var(--primary-color);
+    border: 2px solid var(--border-color);
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    background-color: var(--primary-color);
+    color: var(--bg-dark);
+    box-shadow: 0 0 15px var(--primary-color);
+}
+
+button:active {
+    transform: scale(0.95);
+}
+
+input[type="text"],
+input[type="file"],
+select,
+textarea {
+    background-color: var(--code-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-family: inherit;
+}
+
+input[type="text"]:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 5px var(--primary-color);
+}
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    background-color: var(--bg-darker);
+    color: var(--primary-color);
+    border: 1px solid var(--border-color);
+    text-align: center;
+    border-radius: 6px;
+    padding: 0.5rem;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+    .hex-grid {
+        grid-template-columns: repeat(8, 1fr);
+    }
+    
+    .tab-container {
+        flex-wrap: wrap;
+    }
+}
